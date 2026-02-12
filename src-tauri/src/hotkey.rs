@@ -1,7 +1,7 @@
 use tauri::AppHandle;
 use tauri_plugin_global_shortcut::GlobalShortcutExt;
 
-pub const DEFAULT_HOTKEY: &str = "CmdOrCtrl+Shift+A";
+pub const DEFAULT_HOTKEY: &str = "CmdOrCtrl+Shift+G";
 
 pub fn register_hotkey(app: &AppHandle, shortcut: &str) -> Result<(), String> {
     // Unregister all first

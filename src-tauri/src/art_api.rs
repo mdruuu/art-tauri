@@ -21,7 +21,12 @@ fn strip_html(s: &str) -> String {
 /// Download image bytes with validation: checks HTTP status, content-type, and minimum size.
 /// Returns (bytes, mime_type) or None on any failure.
 async fn download_image(client: &Client, url: &str) -> Option<(Vec<u8>, String)> {
-    let resp = client.get(url).send().await.ok()?;
+    let mut req = client.get(url);
+    // AIC's IIIF server requires a Referer header
+    if url.contains("artic.edu") {
+        req = req.header("Referer", "https://www.artic.edu/");
+    }
+    let resp = req.send().await.ok()?;
     if !resp.status().is_success() {
         log::warn!("Image HTTP {}: {}", resp.status(), url);
         return None;
