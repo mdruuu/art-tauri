@@ -10,6 +10,11 @@
   let loading = $state(true);
   let shown = false;
 
+  // 3-second lock: prevent close/navigate after opening
+  let locked = $state(true);
+  let elapsedSeconds = $state(0);
+  let elapsedInterval: ReturnType<typeof setInterval> | null = null;
+
   // Derived: show the info bar based on whichever artwork is current
   let artwork = $derived(displayedArtwork);
 
@@ -59,7 +64,18 @@
     }
     loadArtwork();
 
+    // Start the elapsed timer
+    elapsedSeconds = 0;
+    locked = true;
+    elapsedInterval = setInterval(() => {
+      elapsedSeconds++;
+    }, 1000);
+    setTimeout(() => {
+      locked = false;
+    }, 3000);
+
     function onKeyDown(e: KeyboardEvent) {
+      if (locked) return;
       switch (e.key) {
         case "Escape":
           invoke("dismiss_overlays");
@@ -96,6 +112,7 @@
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("mousemove", onMouseMove);
       if (infoTimer) clearTimeout(infoTimer);
+      if (elapsedInterval) clearInterval(elapsedInterval);
       clearTimeout(safetyTimeout);
     };
   });
@@ -133,6 +150,13 @@
       <div class="spinner"></div>
     </div>
   {/if}
+
+  <div class="timer" class:locked>
+    {#if locked}
+      <span class="lock-icon">&#x1f512;</span>
+    {/if}
+    {Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, "0")}
+  </div>
 </div>
 
 <style>
@@ -228,5 +252,30 @@
     to {
       transform: rotate(360deg);
     }
+  }
+
+  .timer {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.25);
+    font-family: inherit;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+  }
+
+  .timer.locked {
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  .lock-icon {
+    font-size: 1.1rem;
   }
 </style>

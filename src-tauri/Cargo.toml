@@ -1,6 +1,6 @@
 [package]
 name = "art-tauri"
-version = "0.1.1"
+version = "0.1.2"
 description = "Fullscreen museum artwork display"
 authors = ["you"]
 license = ""
